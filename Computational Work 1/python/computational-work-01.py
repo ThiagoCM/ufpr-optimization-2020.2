@@ -6,8 +6,21 @@ from matplotlib.colors import LogNorm
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import cm
 from random import uniform
+import evaluation_functions as ef
+
+
 def rosenbrock(x, y):
     return (x-1)**2 + 100*(y-x**2)**2;
+
+def beale(x, y):
+    return (x*y + 1.5 - x)**2 + (x * (y**2) + 2.5 - x)**2 + (x * (y**3) + 2.625 - x)
+
+def booth(x, y):
+    return (x + 2 * y - 7)**2 + (2*x  + y - 5)**2
+
+def matyas(x, y):
+    return 0.26*(x**2 + y**2) - 0.48*(x*y)
+
 
 def plot_rosenbrock():
     step = .15
@@ -25,7 +38,8 @@ def plot_rosenbrock():
     plt.show()
 
 def bfgs_rosenbrock2d(minValue, maxValue):
-    answerListValues = []
+    answerList = []
+    answerValuesList = []
     for i in range(30):
         print('\nInteration:',i)
         x0 = [uniform(minValue, maxValue), uniform(minValue, maxValue)]
@@ -33,11 +47,13 @@ def bfgs_rosenbrock2d(minValue, maxValue):
         answer = optimize.minimize(optimize.rosen, x0, method='BFGS', jac = optimize.rosen_der,
                                    options={'disp':True, 'return_all':True})
         print('Rosenbrock Minimized Value:',answer.x)
-        answerListValues.append(answer.x)
-    return answerListValues
+        answerList.append(answer)
+        answerValuesList.append(answer.x)
+    return answerList, answerValuesList
 
 def bfgs_rosenbrock30d(minValue, maxValue):
-    answerListValues = []
+    answerList = []
+    answerValuesList = []
     for i in range(30):
         print('\nInteration:',i)
         x0 = []
@@ -47,20 +63,17 @@ def bfgs_rosenbrock30d(minValue, maxValue):
         answer = optimize.minimize(optimize.rosen, x0, method='BFGS', jac = optimize.rosen_der,
                                    options={'disp':True, 'return_all':True})
         print('Rosenbrock Minimized Value:',answer.x)
-        answerListValues.append(answer.x)
-    return answerListValues
-
-
-def evaluate_method(answerList, methodName):
-    print('\nEvaluation of:', methodName)
-    print('\nMinimum:', np.min(answerList, axis=0))
-    print('\nMaximum:', np.max(answerList, axis=0))
-    print('\nMean:', np.mean(answerList, axis=0))
-    print('\nMedian:', np.median(answerList, axis=0))
+        answerList.append(answer)
+        answerValuesList.append(answer.x)
+    return answerList, answerValuesList
 
 #plot_rosenbrock()
-answersValues = bfgs_rosenbrock2d(-1,1)
-evaluate_method(answersValues, 'Rosenbrock 2D')
+result2dList, result2dValueList = bfgs_rosenbrock2d(-1,1)
+minimum2dInterationResult = ef.minimum_iterations(result2dList)
+minimum2dInterationConvergeResult = ef.minimum_iterations_converge(result2dList)
+ef.evaluate_method(result2dValueList, 'Rosenbrock 2D')
 
-answersValues = bfgs_rosenbrock30d(-1, 1)
-evaluate_method(answersValues, 'Rosenbrock 30D')
+result30dList, result30dValueList = bfgs_rosenbrock30d(-1, 1)
+minimum30dInterationResult = ef.minimum_iterations(result30dList)
+minimum30dInterationConvergeResult = ef.minimum_iterations_converge(result30dList)
+ef.evaluate_method(result30dValueList , 'Rosenbrock 30D')
